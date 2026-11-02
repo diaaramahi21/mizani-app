@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "mizani-v1";
+const CACHE_NAME = "mizani-v2";
 
 const FILES_TO_CACHE = [
   "./",
