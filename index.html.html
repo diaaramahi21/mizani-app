@@ -1,0 +1,548 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ميزاني | Mizani</title>
+<style>
+:root {
+  --bg:#101827;--panel:#1b293b;--panel2:#24364b;
+  --text:#f1f5f9;--muted:#9aabc0;--green:#35d39a;
+  --blue:#58a6ff;--orange:#ffb454;--red:#ff7272;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:Arial,Tahoma,sans-serif;padding:18px;
+}
+.container{max-width:850px;margin:auto}
+header{text-align:center;margin:10px 0 25px}
+header h1{font-size:34px;margin:0;color:var(--green)}
+header p{color:var(--muted);margin-top:8px}
+h2{font-size:19px;margin-top:0}
+.panel{
+  background:var(--panel);border:1px solid #304158;
+  border-radius:14px;padding:18px;margin-bottom:14px;
+}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.stat{background:var(--panel2);padding:14px;border-radius:12px}
+.stat small{color:var(--muted)}
+.stat strong{display:block;font-size:25px;margin:8px 0}
+input,select,button{
+  width:100%;padding:11px;border-radius:9px;
+  border:1px solid #42546a;background:#101d2d;color:white;
+  font-size:15px;margin-top:6px;
+}
+label{display:block;color:var(--muted);font-size:13px;margin-top:12px}
+button{background:var(--green);color:#10251e;border:0;font-weight:bold;cursor:pointer}
+button:hover{filter:brightness(1.08)}
+button.secondary{background:var(--panel2);color:white}
+button.danger{background:#713c47;color:white}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
+.progress{height:8px;background:#34465b;border-radius:20px;overflow:hidden;margin-top:9px}
+.progress div{height:100%;background:var(--green);width:0%;transition:.2s}
+.food-item{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:10px;background:var(--panel2);padding:11px;
+  border-radius:10px;margin-top:8px;
+}
+.food-item button{width:auto;padding:8px 13px;margin:0}
+.food-item small{color:var(--muted)}
+.meal{margin-top:14px}
+.meal h3{color:var(--green);font-size:16px}
+.entry{
+  display:flex;justify-content:space-between;gap:8px;
+  padding:10px;border-bottom:1px solid #34465b;align-items:center;
+}
+.entry span{font-size:13px}
+.entry button{width:auto;padding:6px 10px;margin:0}
+.muted{color:var(--muted);font-size:13px}
+.dropdown{padding:0;overflow:hidden}
+.dropdown summary{
+  cursor:pointer;list-style:none;padding:17px 18px;
+  font-size:16px;font-weight:bold;color:var(--text);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.dropdown summary::-webkit-details-marker{display:none}
+.dropdown summary::after{content:"+";font-size:22px;color:var(--green)}
+.dropdown[open] summary::after{content:"−"}
+.dropdown-content{
+  padding:0 18px 18px;border-top:1px solid #304158;
+}
+.dropdown summary:hover{background:var(--panel2)}
+.section-note{margin:12px 0;color:var(--muted);font-size:12px}
+footer{text-align:center;color:var(--muted);padding:20px}
+@media(max-width:500px){
+ body{padding:10px}
+ .panel{padding:13px}
+ .dropdown-content{padding:0 13px 15px}
+ .dropdown summary{padding:15px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+<h1>ميزاني 🥗</h1>
+<p>تابع أكلك، احسب بروتينك، وحقق أهدافك</p>
+<div id="today" class="muted"></div>
+</header>
+
+<!-- ملخص اليوم -->
+<section class="panel">
+<h2>📊 ملخص اليوم</h2>
+<div class="grid">
+  <div class="stat">
+    <small>السعرات</small>
+    <strong id="calories">0</strong>
+    <small id="caloriesGoal">من 2700</small>
+    <div class="progress"><div id="calBar"></div></div>
+  </div>
+  <div class="stat">
+    <small>البروتين</small>
+    <strong id="protein">0 غ</strong>
+    <small id="proteinGoal">من 175 غ</small>
+    <div class="progress"><div id="proBar"></div></div>
+  </div>
+  <div class="stat">
+    <small>الكارب</small>
+    <strong id="carbs">0 غ</strong>
+    <small id="carbsGoal">من 345 غ</small>
+    <div class="progress"><div id="carbBar"></div></div>
+  </div>
+  <div class="stat">
+    <small>الدهون</small>
+    <strong id="fat">0 غ</strong>
+    <small id="fatGoal">من 80 غ</small>
+    <div class="progress"><div id="fatBar"></div></div>
+  </div>
+  <div class="stat">
+    <small>الألياف</small>
+    <strong id="fiber">0 غ</strong>
+    <small id="fiberGoal">من 30 غ</small>
+    <div class="progress"><div id="fiberBar"></div></div>
+  </div>
+</div>
+</section>
+
+<!-- معلومات وأهداف -->
+<details class="panel dropdown">
+<summary>👤 معلوماتي وأهدافي</summary>
+<div class="dropdown-content">
+<div class="grid">
+  <div><label>العمر</label><input id="age" type="number" value="24"></div>
+  <div><label>الوزن (كغم)</label><input id="weight" type="number" value="89"></div>
+  <div><label>الطول (سم)</label><input id="height" type="number" value="200"></div>
+  <div><label>السعرات اليومية</label><input id="goalCalories" type="number" value="2700"></div>
+  <div><label>البروتين (غرام)</label><input id="goalProtein" type="number" value="175"></div>
+  <div><label>الكارب (غرام)</label><input id="goalCarbs" type="number" value="345"></div>
+  <div><label>الدهون (غرام)</label><input id="goalFat" type="number" value="80"></div>
+  <div><label>الألياف (غرام)</label><input id="goalFiber" type="number" value="30"></div>
+</div>
+<button onclick="saveProfile()">حفظ المعلومات والأهداف</button>
+<p class="section-note">أهدافك تقديرية كبداية ويمكن تعديلها حسب تقدمك.</p>
+</div>
+</details>
+
+<!-- البحث عن الطعام -->
+<details class="panel dropdown" open>
+<summary>🔎 البحث عن الطعام وإضافته</summary>
+<div class="dropdown-content">
+<label>ابحث عن الطعام</label>
+<input id="search" placeholder="مثلاً: تونة، دجاج، بيض، رز..." oninput="showFoods()">
+<div id="foodResults"></div>
+
+<div class="row">
+  <div>
+    <label>الكمية بالجرام</label>
+    <input id="grams" type="number" value="100" min="1">
+  </div>
+  <div>
+    <label>نوع الوجبة</label>
+    <select id="meal">
+      <option>فطور</option>
+      <option>غداء</option>
+      <option>عشاء</option>
+      <option>سناك</option>
+    </select>
+  </div>
+</div>
+<button onclick="addFood()">+ أضف إلى يومي</button>
+<p class="section-note">القيم الغذائية تقريبية لكل 100 غرام. انتبه للفرق بين وزن الطعام النيء والمطبوخ.</p>
+</div>
+</details>
+
+<!-- إضافة طعام جديد -->
+<details class="panel dropdown">
+<summary>➕ إضافة طعام جديد لقاعدتي</summary>
+<div class="dropdown-content">
+<p class="section-note">أدخل القيم الموجودة على العبوة لكل 100 غرام.</p>
+<div class="grid">
+  <div><label>اسم الطعام</label><input id="newName" placeholder="مثلاً: زبادي يوناني"></div>
+  <div><label>السعرات</label><input id="newCal" type="number" min="0"></div>
+  <div><label>البروتين (غ)</label><input id="newPro" type="number" min="0"></div>
+  <div><label>الكارب (غ)</label><input id="newCarb" type="number" min="0"></div>
+  <div><label>الدهون (غ)</label><input id="newFat" type="number" min="0"></div>
+  <div><label>الألياف (غ)</label><input id="newFiber" type="number" min="0"></div>
+</div>
+<button onclick="addCustomFood()">حفظ الطعام</button>
+</div>
+</details>
+
+<!-- الوجبات -->
+<details class="panel dropdown" open>
+<summary>🍽️ وجبات اليوم</summary>
+<div class="dropdown-content">
+<div id="entries"></div>
+</div>
+</details>
+
+<!-- المياه -->
+<details class="panel dropdown">
+<summary>💧 متابعة شرب المياه</summary>
+<div class="dropdown-content">
+<div class="stat">
+<strong id="water">0 مل</strong>
+<div class="row">
+<button onclick="addWater(250)">+ 250 مل</button>
+<button onclick="addWater(500)">+ 500 مل</button>
+<button class="secondary" onclick="addWater(-250)">- 250 مل</button>
+</div>
+</div>
+</div>
+</details>
+
+<!-- إدارة البيانات -->
+<details class="panel dropdown">
+<summary>⚙️ إدارة بياناتي</summary>
+<div class="dropdown-content">
+<div class="row">
+<button class="secondary" onclick="exportCSV()">تصدير سجل اليوم CSV</button>
+<button class="danger" onclick="resetDay()">مسح بيانات اليوم</button>
+</div>
+<p class="section-note">بياناتك محفوظة تلقائياً في المتصفح على هذا الجهاز.</p>
+</div>
+</details>
+
+<footer>ميزاني Mizani © 2026</footer>
+</div>
+
+<script>
+const defaultFoods = [
+{name:"صدر دجاج مشوي",cal:165,pro:31,carb:0,fat:3.6,fiber:0},
+{name:"صدر دجاج نيء",cal:120,pro:22.5,carb:0,fat:2.6,fiber:0},
+{name:"تونة بالماء مصفاة",cal:116,pro:26,carb:0,fat:0.8,fiber:0},
+{name:"بيض كامل",cal:143,pro:12.6,carb:0.7,fat:9.5,fiber:0},
+{name:"بياض البيض",cal:52,pro:10.9,carb:0.7,fat:0.2,fiber:0},
+{name:"زبادي يوناني",cal:73,pro:10,carb:4,fat:2,fiber:0},
+{name:"زبادي عادي",cal:61,pro:3.5,carb:4.7,fat:3.3,fiber:0},
+{name:"حليب قليل الدسم",cal:47,pro:3.4,carb:5,fat:1.5,fiber:0},
+{name:"شوفان",cal:389,pro:16.9,carb:66.3,fat:6.9,fiber:10.6},
+{name:"موز",cal:89,pro:1.1,carb:22.8,fat:0.3,fiber:2.6},
+{name:"تفاح",cal:52,pro:0.3,carb:13.8,fat:0.2,fiber:2.4},
+{name:"أرز أبيض مطبوخ",cal:130,pro:2.7,carb:28.2,fat:0.3,fiber:0.4},
+{name:"أرز أبيض نيء",cal:365,pro:7.1,carb:80,fat:0.7,fiber:1.3},
+{name:"بطاطا مسلوقة",cal:87,pro:1.9,carb:20.1,fat:0.1,fiber:1.8},
+{name:"بطاطا حلوة",cal:86,pro:1.6,carb:20.1,fat:0.1,fiber:3},
+{name:"حمص مسلوق",cal:164,pro:8.9,carb:27.4,fat:2.6,fiber:7.6},
+{name:"بازلاء",cal:84,pro:5.4,carb:15.6,fat:0.4,fiber:5.5},
+{name:"عدس مطبوخ",cal:116,pro:9,carb:20.1,fat:0.4,fiber:7.9},
+{name:"لوز",cal:579,pro:21.2,carb:21.6,fat:49.9,fiber:12.5},
+{name:"زبدة الفول السوداني",cal:588,pro:25,carb:20,fat:50,fiber:6},
+{name:"خبز أبيض",cal:266,pro:8.9,carb:49,fat:3.2,fiber:2.7},
+{name:"خبز أسمر",cal:247,pro:13,carb:41,fat:4.2,fiber:7},
+{name:"جبنة قريش",cal:98,pro:11.1,carb:3.4,fat:4.3,fiber:0},
+{name:"بروكلي",cal:34,pro:2.8,carb:6.6,fat:0.4,fiber:2.6},
+{name:"خيار",cal:15,pro:0.7,carb:3.6,fat:0.1,fiber:0.5},
+{name:"طماطم",cal:18,pro:0.9,carb:3.9,fat:0.2,fiber:1.2},
+{name:"زيت زيتون",cal:884,pro:0,carb:0,fat:100,fiber:0}
+];
+
+const today = new Date().toLocaleDateString("en-CA");
+
+let foods = JSON.parse(localStorage.getItem("mizaniFoods") || "null") || defaultFoods;
+let profile = JSON.parse(localStorage.getItem("mizaniProfile") || "null") || {};
+let dayData = JSON.parse(localStorage.getItem("mizaniDay") || "null");
+
+if(!dayData || dayData.date !== today){
+ dayData = {date:today,entries:[],water:0};
+}
+
+let selectedFood = null;
+
+function save(){
+ localStorage.setItem("mizaniFoods",JSON.stringify(foods));
+ localStorage.setItem("mizaniProfile",JSON.stringify(profile));
+ localStorage.setItem("mizaniDay",JSON.stringify(dayData));
+}
+
+function val(id){
+ return Number(document.getElementById(id).value)||0;
+}
+
+function loadProfile(){
+ ["age","weight","height","goalCalories","goalProtein","goalCarbs","goalFat","goalFiber"].forEach(id=>{
+  if(profile[id]!==undefined){
+   document.getElementById(id).value=profile[id];
+  }
+ });
+}
+
+function saveProfile(){
+ ["age","weight","height","goalCalories","goalProtein","goalCarbs","goalFat","goalFiber"].forEach(id=>{
+  profile[id]=val(id);
+ });
+ save();
+ render();
+ alert("تم حفظ معلوماتك وأهدافك!");
+}
+
+function showFoods(){
+ const q=document.getElementById("search").value.trim().toLowerCase();
+ const results=foods.filter(f=>f.name.toLowerCase().includes(q)).slice(0,30);
+ const box=document.getElementById("foodResults");
+ box.innerHTML="";
+ selectedFood=null;
+
+ results.forEach(f=>{
+  const div=document.createElement("div");
+  div.className="food-item";
+
+  const info=document.createElement("div");
+  const name=document.createElement("strong");
+  name.textContent=f.name;
+
+  const details=document.createElement("small");
+  details.textContent=`${f.cal} سعرة | بروتين ${f.pro}غ | كارب ${f.carb}غ`;
+
+  info.append(name,document.createElement("br"),details);
+
+  const btn=document.createElement("button");
+  btn.textContent="اختيار";
+  btn.onclick=()=>{
+   selectedFood=f;
+   document.getElementById("search").value=f.name;
+   box.innerHTML="";
+   const selected=document.createElement("div");
+   selected.className="food-item";
+   selected.textContent="تم اختيار: "+f.name;
+   box.append(selected);
+  };
+
+  div.append(info,btn);
+  box.append(div);
+ });
+}
+
+function addFood(){
+ if(!selectedFood){
+  alert("ابحث عن الطعام واضغط اختيار أولاً");
+  return;
+ }
+
+ const grams=val("grams");
+ if(grams<=0){
+  alert("أدخل كمية صحيحة");
+  return;
+ }
+
+ const factor=grams/100;
+
+ dayData.entries.push({
+  name:selectedFood.name,
+  grams,
+  meal:document.getElementById("meal").value,
+  cal:selectedFood.cal*factor,
+  pro:selectedFood.pro*factor,
+  carb:selectedFood.carb*factor,
+  fat:selectedFood.fat*factor,
+  fiber:selectedFood.fiber*factor
+ });
+
+ save();
+ render();
+
+ document.getElementById("search").value="";
+ document.getElementById("foodResults").innerHTML="";
+ selectedFood=null;
+}
+
+function addCustomFood(){
+ const name=document.getElementById("newName").value.trim();
+
+ if(!name){
+  alert("اكتب اسم الطعام");
+  return;
+ }
+
+ if(foods.some(f=>f.name===name)){
+  alert("هذا الطعام موجود بالفعل");
+  return;
+ }
+
+ const food={
+  name,
+  cal:val("newCal"),
+  pro:val("newPro"),
+  carb:val("newCarb"),
+  fat:val("newFat"),
+  fiber:val("newFiber")
+ };
+
+ foods.push(food);
+ save();
+ showFoods();
+
+ document.getElementById("newName").value="";
+ ["newCal","newPro","newCarb","newFat","newFiber"].forEach(id=>{
+  document.getElementById(id).value="";
+ });
+
+ alert("تم حفظ الطعام!");
+}
+
+function removeEntry(index){
+ dayData.entries.splice(index,1);
+ save();
+ render();
+}
+
+function addWater(amount){
+ dayData.water=Math.max(0,dayData.water+amount);
+ save();
+ render();
+}
+
+function sum(key){
+ return dayData.entries.reduce((s,e)=>s+e[key],0);
+}
+
+function setBar(id,current,goal){
+ document.getElementById(id).style.width=
+ Math.min(100,goal?current/goal*100:0)+"%";
+}
+
+function render(){
+ const totals={
+  cal:sum("cal"),
+  pro:sum("pro"),
+  carb:sum("carb"),
+  fat:sum("fat"),
+  fiber:sum("fiber")
+ };
+
+ const goals={
+  cal:val("goalCalories"),
+  pro:val("goalProtein"),
+  carb:val("goalCarbs"),
+  fat:val("goalFat"),
+  fiber:val("goalFiber")
+ };
+
+ document.getElementById("calories").textContent=Math.round(totals.cal);
+ document.getElementById("protein").textContent=totals.pro.toFixed(1)+" غ";
+ document.getElementById("carbs").textContent=totals.carb.toFixed(1)+" غ";
+ document.getElementById("fat").textContent=totals.fat.toFixed(1)+" غ";
+ document.getElementById("fiber").textContent=totals.fiber.toFixed(1)+" غ";
+
+ const bars={
+  cal:["caloriesGoal","calBar","سعرة"],
+  pro:["proteinGoal","proBar","غ"],
+  carb:["carbsGoal","carbBar","غ"],
+  fat:["fatGoal","fatBar","غ"],
+  fiber:["fiberGoal","fiberBar","غ"]
+ };
+
+ Object.keys(bars).forEach(k=>{
+  const [label,bar,unit]=bars[k];
+  document.getElementById(label).textContent="من "+goals[k]+" "+unit;
+  setBar(bar,totals[k],goals[k]);
+ });
+
+ const meals=["فطور","غداء","عشاء","سناك"];
+ const box=document.getElementById("entries");
+ box.innerHTML="";
+
+ meals.forEach(meal=>{
+  const list=dayData.entries
+   .map((e,i)=>({...e,index:i}))
+   .filter(e=>e.meal===meal);
+
+  if(!list.length)return;
+
+  const section=document.createElement("div");
+  section.className="meal";
+
+  const h=document.createElement("h3");
+  h.textContent=meal;
+  section.append(h);
+
+  list.forEach(e=>{
+   const row=document.createElement("div");
+   row.className="entry";
+
+   const info=document.createElement("span");
+   info.textContent=
+   `${e.name} (${e.grams}غ) | ${Math.round(e.cal)} سعرة | بروتين ${e.pro.toFixed(1)}غ`;
+
+   const btn=document.createElement("button");
+   btn.className="danger";
+   btn.textContent="حذف";
+   btn.onclick=()=>removeEntry(e.index);
+
+   row.append(info,btn);
+   section.append(row);
+  });
+
+  box.append(section);
+ });
+
+ if(!box.innerHTML){
+  box.textContent="لسه ما أضفت أي وجبة اليوم.";
+ }
+
+ document.getElementById("water").textContent=dayData.water+" مل";
+}
+
+function resetDay(){
+ if(!confirm("متأكد إنك بدك تمسح سجل اليوم والمياه؟"))return;
+
+ dayData={date:today,entries:[],water:0};
+ save();
+ render();
+}
+
+function exportCSV(){
+ const rows=[
+  ["الوجبة","الطعام","الكمية غرام","السعرات","البروتين","الكارب","الدهون","الألياف"]
+ ];
+
+ dayData.entries.forEach(e=>{
+  rows.push([
+   e.meal,e.name,e.grams,
+   e.cal.toFixed(1),e.pro.toFixed(1),
+   e.carb.toFixed(1),e.fat.toFixed(1),e.fiber.toFixed(1)
+  ]);
+ });
+
+ const csv="\uFEFF"+rows.map(r=>
+  r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")
+ ).join("\n");
+
+ const a=document.createElement("a");
+ a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+ a.download="mizani-day.csv";
+ a.click();
+ URL.revokeObjectURL(a.href);
+}
+
+document.getElementById("today").textContent="تاريخ اليوم: "+today;
+
+loadProfile();
+showFoods();
+render();
+</script>
+</body>
+</html>
